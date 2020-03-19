@@ -1,0 +1,7 @@
+syntax = "proto3";
+package tutorial;
+option go_package = "example/protobuf/SimpleMsg";
+
+message SimpleMsg {
+    string simple_string = 1;
+}
