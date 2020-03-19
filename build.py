@@ -67,7 +67,6 @@ def clean():
 
 
 if __name__ == '__main__':
-
     parser = argparse.ArgumentParser(description='This script builds the protobuf-networking project')
     parser.add_argument('--clean', '-c', action='store_true', help='Perform a clean build', default=False)
     args = parser.parse_args()
@@ -76,7 +75,7 @@ if __name__ == '__main__':
         clean()
 
     if not verify_deps():
-        exit()
+        exit(-1)
 
     build_protobufs()
     build_go()
