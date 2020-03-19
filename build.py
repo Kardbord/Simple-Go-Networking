@@ -11,7 +11,7 @@ SENDER = 'sender.go'
 RECEIVER = 'receiver.go'
 BUILD_DIR = 'build'
 PROTO_SRC = 'protobuf'
-PROTO_BUILD_DIR = PROTO_SRC + '/build'
+PROTO_BUILD_DIR = PROTO_SRC + "/protobuild"
 
 WINBUILD = platform.system() == "Windows"
 
@@ -37,12 +37,9 @@ def verify_deps():
 
 
 def build_protobufs():
-    if not os.path.isdir(PROTO_BUILD_DIR):
-        os.mkdir(PROTO_BUILD_DIR)
-
     for filename in os.listdir(PROTO_SRC):
         if filename.endswith('.proto'):
-            cmd = 'protoc -I={} --go_out={} {}'.format(PROTO_SRC, PROTO_BUILD_DIR, os.path.join(PROTO_SRC, filename))
+            cmd = 'protoc -I={} --go_out={} {}'.format(PROTO_SRC, PROTO_SRC, os.path.join(PROTO_SRC, filename))
             print(cmd)
             subprocess.run(cmd.split(), check=True, stdout=sys.stdout, stderr=sys.stderr)
 

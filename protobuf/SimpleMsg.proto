@@ -1,6 +1,6 @@
 syntax = "proto3";
 package tutorial;
-option go_package = "example/protobuf/SimpleMsg";
+option go_package = "protobuild/SimpleMsg";
 
 message SimpleMsg {
     string simple_string = 1;

@@ -1,4 +1,4 @@
 .idea/
 build/
-protobuf/build/
+protobuf/protobuild
 venv/
