@@ -6,8 +6,8 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes/any"
 	"net"
-	"protobuf-networking/network_info"
-	"protobuf-networking/protobuf/protobuild/simple_msg"
+	"github.com/TannerKvarfordt/Simple-Go-Networking/network_info"
+	"github.com/TannerKvarfordt/Simple-Go-Networking/protobuf/protobuild/simple_msg"
 	"time"
 )
 
@@ -21,14 +21,14 @@ func (sender *Sender) Send(msg descriptor.Message) error {
 	if err != nil {
 		return err
 	}
-	
+
 	generic := &any.Any{TypeUrl: *desc.Name, Value: serializedMsg}
-	
+
 	serializedGeneric, err := proto.Marshal(generic)
 	if err != nil {
 		return err
 	}
-	
+
 	n, err := sender.socket.Write(serializedGeneric)
 	fmt.Println("Wrote", n, "bytes")
 	return err
@@ -42,7 +42,7 @@ func main() {
 		return
 	}
 	sender := &Sender{conn}
-	
+
 	msg := &simple_msg.SimpleMsg{SimpleString: "Test msg"}
 	for i := 0; i < 10; i++ {
 		time.Sleep(1 * time.Second)

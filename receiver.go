@@ -6,8 +6,8 @@ import (
 	"github.com/golang/protobuf/ptypes/any"
 	"io"
 	"net"
-	"protobuf-networking/network_info"
-	"protobuf-networking/protobuf/protobuild/simple_msg"
+	"github.com/TannerKvarfordt/Simple-Go-Networking/network_info"
+	"github.com/TannerKvarfordt/Simple-Go-Networking/protobuf/protobuild/simple_msg"
 )
 
 type MsgHandler = func(b []byte) error
@@ -49,20 +49,20 @@ func handleSimpleMsg(serializedMsg []byte) error {
 	if err != nil {
 		return err
 	}
-	
+
 	fmt.Println("Handled SimpleMsg =", msg.String())
 	return nil
 }
 
 func main() {
 	fmt.Println("Starting receiver...")
-	
+
 	listener, err := net.Listen(network_info.PROTOCOL, network_info.SENDER_FULL)
 	if err != nil {
 		fmt.Println("Failed to establish listener with error:", err)
 		return
 	}
-	
+
 	fmt.Println("Waiting for a connection...")
 	conn, err := listener.Accept()
 	fmt.Println("Connected")
@@ -70,10 +70,10 @@ func main() {
 		fmt.Println("Failed to accept connection with error:", err)
 		return
 	}
-	
+
 	receiver := &Receiver{conn, make(map[string][]MsgHandler)}
 	receiver.RegisterMsgHandler("SimpleMsg", handleSimpleMsg)
-	
+
 	ch := make(chan *any.Any)
 	go receiver.Receive(ch)
 	for msg := range ch {
