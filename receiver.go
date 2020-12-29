@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
+	"github.com/TannerKvarfordt/Simple-Go-Networking/network_info"
+	"github.com/TannerKvarfordt/Simple-Go-Networking/protobuf/protobuild/simple_msg"
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes/any"
 	"io"
 	"net"
-	"github.com/TannerKvarfordt/Simple-Go-Networking/network_info"
-	"github.com/TannerKvarfordt/Simple-Go-Networking/protobuf/protobuild/simple_msg"
 )
 
 type MsgHandler = func(b []byte) error
@@ -65,11 +65,11 @@ func main() {
 
 	fmt.Println("Waiting for a connection...")
 	conn, err := listener.Accept()
-	fmt.Println("Connected")
 	if err != nil {
 		fmt.Println("Failed to accept connection with error:", err)
 		return
 	}
+	fmt.Println("Connected")
 
 	receiver := &Receiver{conn, make(map[string][]MsgHandler)}
 	receiver.RegisterMsgHandler("SimpleMsg", handleSimpleMsg)

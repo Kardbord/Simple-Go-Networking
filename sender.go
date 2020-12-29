@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
+	"github.com/TannerKvarfordt/Simple-Go-Networking/network_info"
+	"github.com/TannerKvarfordt/Simple-Go-Networking/protobuf/protobuild/simple_msg"
 	"github.com/golang/protobuf/descriptor"
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes/any"
 	"net"
-	"github.com/TannerKvarfordt/Simple-Go-Networking/network_info"
-	"github.com/TannerKvarfordt/Simple-Go-Networking/protobuf/protobuild/simple_msg"
 	"time"
 )
 
