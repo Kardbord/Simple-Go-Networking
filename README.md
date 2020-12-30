@@ -15,7 +15,8 @@ Run the following commands:
 go get github.com/TannerKvarfordt/Simple-Go-Networking
 cd "${GOPATH}/src/github.com/TannerKvarfordt/Simple-Go-Networking"
 ./build.py
+# To run the example:
 cd build
-./Receiver &
-./Sender
+./Simple-Go-Receiver &
+./Simple-Go-Sender
 ```
