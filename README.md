@@ -6,18 +6,24 @@ Since this is a project written in Go, obviously you will need [Go](https://gola
 This project also has some additional dependencies. 
 The simplest way to retrieve them and build is to use `make`. It will attempt to retrieve and install the dependencies for you. You must have the `GOPATH` and `GOBIN` environment variables set in order for this to work.
 ```bash
+# This will display a warning about the missing simple_msg package.
+# That's fine because we are going to build it later.
 go get -u github.com/TannerKvarfordt/Simple-Go-Networking
 cd "${GOPATH}/src/github.com/TannerKvarfordt/Simple-Go-Networking"
 make
 ```
 If that does not work or you want to do everything the hard way, manually install everything in the [Dependencies](#dependencies) section. Once that is done, run the following commands.
 ```bash
+# This will display a warning about the missing simple_msg package.
+# That's fine because we are going to build it later.
 go get -u github.com/TannerKvarfordt/Simple-Go-Networking
 cd "${GOPATH}/src/github.com/TannerKvarfordt/Simple-Go-Networking"
 ./build.py -b
 ```
 If you don't even want to make use of the `build.py` script, you can run the following commands instead.
 ```bash
+# This will display a warning about the missing simple_msg package.
+# That's fine because we are going to build it later.
 go get -u github.com/TannerKvarfordt/Simple-Go-Networking
 cd "${GOPATH}/src/github.com/TannerKvarfordt/Simple-Go-Networking"
 protoc -I=protobuf --go_out=protobuf protobuf/SimpleMsg.proto
