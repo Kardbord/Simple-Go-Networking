@@ -8,23 +8,38 @@ import (
 	"github.com/golang/protobuf/ptypes/any"
 	"io"
 	"net"
+  "sync"
 )
 
 type MsgHandler = func(b []byte) error
 
-type Receiver struct {
+type receiver struct {
 	socket      net.Conn
 	msgHandlers map[string][]MsgHandler
+  startOnce   sync.Once
 }
 
-func (receiver *Receiver) RegisterMsgHandler(name string, handler MsgHandler) {
-	receiver.msgHandlers[name] = append(receiver.msgHandlers[name], handler)
+func NewReceiver(protocol string, fromAddr string) (*receiver, error) {
+	listener, err := net.Listen(protocol, fromAddr)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to establish listener:", err)
+	}
+
+	fmt.Println("Waiting for a connection...")
+	conn, err := listener.Accept()
+	if err != nil {
+		return nil, fmt.Errorf("Failed to accept connection:", err)
+	}
+	fmt.Println("Connected")
+
+  r := receiver{conn, make(map[string][]MsgHandler), sync.Once{}}
+  return &r, nil
 }
 
-func (receiver *Receiver) Receive(ch chan *any.Any) {
+func (r *receiver) receiveRoutine(ch chan *any.Any) {
 	for {
 		serializedMsg := make([]byte, network_info.MAX_DATAGRAM_SIZE_BYTES)
-		n, err := receiver.socket.Read(serializedMsg)
+		n, err := r.socket.Read(serializedMsg)
 		if err != nil {
 			if err == io.EOF {
 				fmt.Println("Socket closed by sender")
@@ -43,6 +58,40 @@ func (receiver *Receiver) Receive(ch chan *any.Any) {
 	}
 }
 
+func (r *receiver) handleRoutine(ch chan *any.Any) {
+	for msg := range ch {
+		if handlers, ok := r.msgHandlers[msg.TypeUrl]; ok {
+			// Known message type
+			for _, handler := range handlers {
+        err := handler(msg.Value)
+				if err != nil {
+					fmt.Println("Error handling msg of type", msg.TypeUrl, ":", err)
+				}
+			}
+		} else {
+			// Unhandled message type
+			fmt.Println("Received unhandled message type \"", msg.TypeUrl, "\" -- ignoring it")
+		}
+	}
+}
+
+func (r *receiver) StartReceiver(blockOnThisCall bool) {
+  r.startOnce.Do(func() {
+    ch := make(chan *any.Any)
+    if blockOnThisCall {
+      go r.receiveRoutine(ch)
+      r.handleRoutine(ch)
+    } else {
+      go r.handleRoutine(ch)
+      go r.receiveRoutine(ch)
+    }
+  })
+}
+
+func (r *receiver) RegisterMsgHandler(name string, handler MsgHandler) {
+	r.msgHandlers[name] = append(r.msgHandlers[name], handler)
+}
+
 func handleSimpleMsg(serializedMsg []byte) error {
 	msg := &simple_msg.SimpleMsg{}
 	err := proto.Unmarshal(serializedMsg, msg)
@@ -57,37 +106,15 @@ func handleSimpleMsg(serializedMsg []byte) error {
 func main() {
 	fmt.Println("Starting receiver...")
 
-	listener, err := net.Listen(network_info.PROTOCOL, network_info.SENDER_FULL)
-	if err != nil {
-		fmt.Println("Failed to establish listener with error:", err)
-		return
-	}
+	r, err := NewReceiver(network_info.PROTOCOL, network_info.SENDER_FULL)
+  if err != nil {
+    panic(err)
+  }
+  if r == nil {
+    panic(fmt.Errorf("Receiver object was not created"))
+  }
 
-	fmt.Println("Waiting for a connection...")
-	conn, err := listener.Accept()
-	if err != nil {
-		fmt.Println("Failed to accept connection with error:", err)
-		return
-	}
-	fmt.Println("Connected")
+	r.RegisterMsgHandler("SimpleMsg", handleSimpleMsg)
 
-	receiver := &Receiver{conn, make(map[string][]MsgHandler)}
-	receiver.RegisterMsgHandler("SimpleMsg", handleSimpleMsg)
-
-	ch := make(chan *any.Any)
-	go receiver.Receive(ch)
-	for msg := range ch {
-		if handlers, ok := receiver.msgHandlers[msg.TypeUrl]; ok {
-			// Known message type
-			for _, handler := range handlers {
-				err = handler(msg.Value)
-				if err != nil {
-					fmt.Println("Error handling msg of type", msg.TypeUrl, ":", err)
-				}
-			}
-		} else {
-			// Unhandled message type
-			fmt.Println("Received unhandled message type", msg.TypeUrl, "-- ignoring")
-		}
-	}
+	r.StartReceiver(true)
 }
