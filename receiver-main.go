@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
-	"github.com/TannerKvarfordt/Simple-Go-Networking/receiver"
+  "fmt"
+  "github.com/TannerKvarfordt/Simple-Go-Networking/receiver"
   "github.com/TannerKvarfordt/Simple-Go-Networking/network_info"
   "github.com/TannerKvarfordt/Simple-Go-Networking/protobuf/protobuild/simple_msg"
   "github.com/golang/protobuf/proto"
@@ -20,9 +20,9 @@ func handleSimpleMsg(serializedMsg []byte) error {
 }
 
 func main() {
-	fmt.Println("Starting receiver...")
+  fmt.Println("Starting receiver...")
 
-	r, err := receiver.NewReceiver(network_info.PROTOCOL, network_info.SENDER_FULL)
+  r, err := receiver.NewReceiver(network_info.PROTOCOL, network_info.SENDER_FULL)
   if err != nil {
     panic(err)
   }
@@ -30,7 +30,7 @@ func main() {
     panic(fmt.Errorf("Receiver object was not created"))
   }
 
-	r.RegisterMsgHandler("SimpleMsg", handleSimpleMsg)
+  r.RegisterMsgHandler("SimpleMsg", handleSimpleMsg)
 
-	r.StartReceiver(true)
+  r.StartReceiver(true)
 }
