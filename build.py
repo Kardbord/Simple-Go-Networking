@@ -7,8 +7,10 @@ import sys
 import platform
 import shutil
 
-SENDER = 'sender.go'
-RECEIVER = 'receiver.go'
+SENDER_TARGET = 'Simple-Go-Sender'
+RECV_TARGET = 'Simple-Go-Receiver'
+SENDER = 'sender-main.go'
+RECEIVER = 'receiver-main.go'
 BUILD_DIR = 'build'
 PROTO_SRC = 'protobuf'
 PROTO_BUILD_DIR = PROTO_SRC + "/protobuild"
@@ -45,11 +47,11 @@ def build_protobufs():
 
 
 def build_go():
-    cmd = "go build -v -o {}/Sender{} {}".format(BUILD_DIR, "" if not WINBUILD else ".exe", SENDER)
+    cmd = "go build -v -o {}/{}{} {}".format(BUILD_DIR, SENDER_TARGET, "" if not WINBUILD else ".exe", SENDER)
     print(cmd)
     subprocess.run(cmd.split(), stdout=sys.stdout, stderr=sys.stderr, check=True)
 
-    cmd = "go build -v -o {}/Receiver{} {}".format(BUILD_DIR, "" if not WINBUILD else ".exe", RECEIVER)
+    cmd = "go build -v -o {}/{}{} {}".format(BUILD_DIR, RECV_TARGET, "" if not WINBUILD else ".exe", RECEIVER)
     print(cmd)
     subprocess.run(cmd.split(), stdout=sys.stdout, stderr=sys.stderr, check=True)
 
