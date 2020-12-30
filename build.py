@@ -9,11 +9,12 @@ import shutil
 
 SENDER_TARGET = 'Simple-Go-Sender'
 RECV_TARGET = 'Simple-Go-Receiver'
+GOBIN = os.environ.get('GOBIN')
 SENDER = 'sender-main.go'
 RECEIVER = 'receiver-main.go'
 BUILD_DIR = 'build'
 PROTO_SRC = 'protobuf'
-PROTO_BUILD_DIR = PROTO_SRC + "/protobuild"
+PROTO_BUILD_DIR = PROTO_SRC + "/protobuild" # protoc-gen-go generates a dir called protobuild
 
 WINBUILD = platform.system() == "Windows"
 
@@ -46,7 +47,10 @@ def build_protobufs():
             subprocess.run(cmd.split(), check=True, stdout=sys.stdout, stderr=sys.stderr)
 
 
-def build_go():
+def build_go(add_to_bin):
+    if not isinstance(add_to_bin, bool):
+        raise TypeError('function "build_go" invoked with a bad parameter')
+
     cmd = "go build -v -o {}/{}{} {}".format(BUILD_DIR, SENDER_TARGET, "" if not WINBUILD else ".exe", SENDER)
     print(cmd)
     subprocess.run(cmd.split(), stdout=sys.stdout, stderr=sys.stderr, check=True)
@@ -54,6 +58,20 @@ def build_go():
     cmd = "go build -v -o {}/{}{} {}".format(BUILD_DIR, RECV_TARGET, "" if not WINBUILD else ".exe", RECEIVER)
     print(cmd)
     subprocess.run(cmd.split(), stdout=sys.stdout, stderr=sys.stderr, check=True)
+
+    if add_to_bin:
+        if GOBIN is None:
+            print('$GOBIN is not set, cannot add executables to $GOBIN.')
+            return
+
+        cmd = "go build -v -o {}/{}{} {}".format(GOBIN, SENDER_TARGET, "" if not WINBUILD else ".exe", SENDER)
+        print(cmd)
+        subprocess.run(cmd.split(), stdout=sys.stdout, stderr=sys.stderr, check=True)
+
+        cmd = "go build -v -o {}/{}{} {}".format(GOBIN, RECV_TARGET, "" if not WINBUILD else ".exe", RECEIVER)
+        print(cmd)
+        subprocess.run(cmd.split(), stdout=sys.stdout, stderr=sys.stderr, check=True)
+
 
 
 def clean():
@@ -66,12 +84,23 @@ def clean():
         shutil.rmtree(PROTO_BUILD_DIR)
     except FileNotFoundError:
         pass
+    if GOBIN is None:
+        return
+    try:
+        os.remove('{}/{}'.format(GOBIN, SENDER_TARGET))
+    except FileNotFoundError:
+        pass
+    try:
+        os.remove('{}/{}'.format(GOBIN, RECV_TARGET))
+    except FileNotFoundError:
+        pass
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='This script builds the protobuf-networking project')
     parser.add_argument('--clean', '-c', action='store_true', help='Perform a clean build', default=False)
     parser.add_argument('--clean-only', '-co', action='store_true', help='Perform a clean build', default=False)
+    parser.add_argument('--add-to-bin', '-b', action='store_true', help='Add built files to $GOBIN', default=False)
     args = parser.parse_args()
 
     if args.clean_only:
@@ -85,4 +114,4 @@ if __name__ == '__main__':
         exit(-1)
 
     build_protobufs()
-    build_go()
+    build_go(args.add_to_bin)
