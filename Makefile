@@ -18,6 +18,8 @@ PROTOC_GEN_GO := $(GOBIN)/protoc-gen-go
 # Figure out which machine we're running on.
 UNAME := $(shell uname)
 
+all: $(SENDER_TARGET) $(RECV_TARGET)
+
 $(PROTOC):
 	# Run the right installation command for the operating system.
 ifeq ($(UNAME), Darwin)
@@ -41,8 +43,6 @@ $(RECV_TARGET): $(RECV_MAIN) SimpleMsg.pb.go
 
 SimpleMsg.pb.go: $(PROTO_SRC)/SimpleMsg.proto | $(PROTOC_GEN_GO) $(PROTOC)
 	protoc -I=$(PROTO_SRC) --go_out=$(PROTO_SRC) $(PROTO_SRC)/SimpleMsg.proto
-
-all: $(SENDER_TARGET) $(RECV_TARGET)
 
 clean:
 	rm -rf $(BUILD_DIR)
