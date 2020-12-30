@@ -11,11 +11,20 @@ import (
 	"time"
 )
 
-type Sender struct {
+type sender struct {
 	socket net.Conn
 }
 
-func (sender *Sender) Send(msg descriptor.Message) error {
+func NewSender(protocol string, toAddr string) (*sender, error) {
+	conn, err := net.Dial(protocol, toAddr)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to establish", network_info.PROTOCOL, "connection to", network_info.RECEIVER_FULL, "with error", err)
+	}
+  s := sender{conn}
+  return &s, nil
+}
+
+func (s *sender) Send(msg descriptor.Message) error {
 	_, desc := descriptor.ForMessage(msg)
 	serializedMsg, err := proto.Marshal(msg)
 	if err != nil {
@@ -29,27 +38,28 @@ func (sender *Sender) Send(msg descriptor.Message) error {
 		return err
 	}
 
-	n, err := sender.socket.Write(serializedGeneric)
+	n, err := s.socket.Write(serializedGeneric)
 	fmt.Println("Wrote", n, "bytes")
 	return err
 }
 
 func main() {
 	fmt.Println("Starting sender...")
-	conn, err := net.Dial(network_info.PROTOCOL, network_info.RECEIVER_FULL)
-	if err != nil {
-		fmt.Println("Failed to establish", network_info.PROTOCOL, "connection to", network_info.RECEIVER_FULL, "with error", err)
-		return
-	}
-	sender := &Sender{conn}
+	s, err := NewSender(network_info.PROTOCOL, network_info.RECEIVER_FULL)
+  if err != nil {
+    panic(err)
+  }
+  if s == nil {
+    panic(fmt.Errorf("Sender object was not created"))
+  }
 
 	msg := &simple_msg.SimpleMsg{SimpleString: "Test msg"}
 	for i := 0; i < 10; i++ {
 		time.Sleep(1 * time.Second)
-		err = sender.Send(msg)
+		err = s.Send(msg)
 		if err != nil {
-			fmt.Println("Failed to send msg with error:", err)
+			fmt.Println("Failed to send msg:", err)
 		}
 	}
-	_ = sender.socket.Close()
+	_ = s.socket.Close()
 }
