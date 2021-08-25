@@ -2,9 +2,10 @@ package main
 
 import (
   "fmt"
-  "github.com/TannerKvarfordt/Simple-Go-Networking/receiver"
+
   "github.com/TannerKvarfordt/Simple-Go-Networking/network_info"
   "github.com/TannerKvarfordt/Simple-Go-Networking/protobuf/protobuild/simple_msg"
+  "github.com/TannerKvarfordt/Simple-Go-Networking/receiver"
   "github.com/golang/protobuf/proto"
 )
 

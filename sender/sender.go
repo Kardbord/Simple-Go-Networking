@@ -2,11 +2,12 @@ package sender
 
 import (
   "fmt"
-  "github.com/TannerKvarfordt/Simple-Go-Networking/network_info"
-  "github.com/golang/protobuf/descriptor"
-  "github.com/golang/protobuf/proto"
-  "github.com/golang/protobuf/ptypes/any"
   "net"
+
+  "github.com/TannerKvarfordt/Simple-Go-Networking/network_info"
+  "google.golang.org/protobuf/proto"
+  "google.golang.org/protobuf/reflect/protoreflect"
+  "google.golang.org/protobuf/types/known/anypb"
 )
 
 type sender struct {
@@ -16,20 +17,20 @@ type sender struct {
 func NewSender(protocol string, toAddr string) (*sender, error) {
   conn, err := net.Dial(protocol, toAddr)
   if err != nil {
-    return nil, fmt.Errorf("Failed to establish", network_info.PROTOCOL, "connection to", network_info.RECEIVER_FULL, "with error", err)
+    return nil, fmt.Errorf("failed to establish %v connection to %v with error %v", network_info.PROTOCOL, network_info.RECEIVER_FULL, err)
   }
   s := sender{conn}
   return &s, nil
 }
 
-func (s *sender) Send(msg descriptor.Message) error {
-  _, desc := descriptor.ForMessage(msg)
+func (s *sender) Send(msg proto.Message) error {
   serializedMsg, err := proto.Marshal(msg)
   if err != nil {
     return err
   }
 
-  generic := &any.Any{TypeUrl: *desc.Name, Value: serializedMsg}
+  msgName := protoreflect.Name(proto.MessageName(msg))
+  generic := &anypb.Any{TypeUrl: string(msgName), Value: serializedMsg}
 
   serializedGeneric, err := proto.Marshal(generic)
   if err != nil {

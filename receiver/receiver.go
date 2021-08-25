@@ -2,12 +2,13 @@ package receiver
 
 import (
   "fmt"
-  "github.com/TannerKvarfordt/Simple-Go-Networking/network_info"
-  "github.com/golang/protobuf/proto"
-  "github.com/golang/protobuf/ptypes/any"
   "io"
   "net"
   "sync"
+
+  "github.com/TannerKvarfordt/Simple-Go-Networking/network_info"
+  "google.golang.org/protobuf/proto"
+  "google.golang.org/protobuf/types/known/anypb"
 )
 
 type MsgHandler = func(b []byte) error
@@ -21,13 +22,13 @@ type receiver struct {
 func NewReceiver(protocol string, fromAddr string) (*receiver, error) {
   listener, err := net.Listen(protocol, fromAddr)
   if err != nil {
-    return nil, fmt.Errorf("Failed to establish listener:", err)
+    return nil, fmt.Errorf("failed to establish listener: %v", err)
   }
 
   fmt.Println("Waiting for a connection...")
   conn, err := listener.Accept()
   if err != nil {
-    return nil, fmt.Errorf("Failed to accept connection:", err)
+    return nil, fmt.Errorf("failed to accept connection: %v", err)
   }
   fmt.Println("Connected")
 
@@ -35,7 +36,7 @@ func NewReceiver(protocol string, fromAddr string) (*receiver, error) {
   return &r, nil
 }
 
-func (r *receiver) receiveRoutine(ch chan *any.Any) {
+func (r *receiver) receiveRoutine(ch chan *anypb.Any) {
   for {
     serializedMsg := make([]byte, network_info.MAX_DATAGRAM_SIZE_BYTES)
     n, err := r.socket.Read(serializedMsg)
@@ -47,7 +48,7 @@ func (r *receiver) receiveRoutine(ch chan *any.Any) {
       }
       panic(err)
     }
-    msg := &any.Any{}
+    msg := &anypb.Any{}
     err = proto.Unmarshal(serializedMsg[:n], msg)
     if err != nil {
       panic(err)
@@ -57,7 +58,7 @@ func (r *receiver) receiveRoutine(ch chan *any.Any) {
   }
 }
 
-func (r *receiver) handleRoutine(ch chan *any.Any) {
+func (r *receiver) handleRoutine(ch chan *anypb.Any) {
   for msg := range ch {
     if handlers, ok := r.msgHandlers[msg.TypeUrl]; ok {
       // Known message type
@@ -76,7 +77,7 @@ func (r *receiver) handleRoutine(ch chan *any.Any) {
 
 func (r *receiver) StartReceiver(blockOnThisCall bool) {
   r.startOnce.Do(func() {
-    ch := make(chan *any.Any)
+    ch := make(chan *anypb.Any)
     if blockOnThisCall {
       go r.receiveRoutine(ch)
       r.handleRoutine(ch)

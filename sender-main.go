@@ -2,10 +2,11 @@ package main
 
 import (
   "fmt"
-  "github.com/TannerKvarfordt/Simple-Go-Networking/network_info"
-  "github.com/TannerKvarfordt/Simple-Go-Networking/sender"
-  "github.com/TannerKvarfordt/Simple-Go-Networking/protobuf/protobuild/simple_msg"
   "time"
+
+  "github.com/TannerKvarfordt/Simple-Go-Networking/network_info"
+  "github.com/TannerKvarfordt/Simple-Go-Networking/protobuf/protobuild/simple_msg"
+  "github.com/TannerKvarfordt/Simple-Go-Networking/sender"
 )
 
 func main() {
