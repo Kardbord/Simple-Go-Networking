@@ -99,7 +99,7 @@ def clean():
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='This script builds the protobuf-networking project')
     parser.add_argument('--clean', '-c', action='store_true', help='Perform a clean build', default=False)
-    parser.add_argument('--clean-only', '-co', action='store_true', help='Perform a clean build', default=False)
+    parser.add_argument('--clean-only', '-co', action='store_true', help='Clean existing build', default=False)
     parser.add_argument('--add-to-bin', '-b', action='store_true', help='Add built files to $GOBIN', default=False)
     args = parser.parse_args()
 
