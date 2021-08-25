@@ -31,7 +31,7 @@ endif
 
 # If $GOPATH/bin/protoc-gen-go does not exist, we'll run this command to install it.
 $(PROTOC_GEN_GO):
-	go get -u github.com/golang/protobuf/protoc-gen-go
+	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 
 $(SENDER_TARGET): $(SENDER_MAIN) SimpleMsg.pb.go
 	go build -v -o $(BUILD_DIR)/$(SENDER_TARGET) $(SENDER_MAIN)
